@@ -2,8 +2,42 @@ grammar life.game.GameDSL with org.eclipse.xtext.common.Terminals
 
 generate gameDSL "http://www.game.life/GameDSL"
 
-Model:
-	greetings+=Greeting*;
+GoL:
+	'Game' 'of' 'life:' grid=Grid? 
+	('Initialize:' init = Initialization)?
+	('Rules:' rules += Evolution+)?;
 	
-Greeting:
-	'Hello' name=ID '!';
+Grid:
+	'Grid' '(' width = INT ',' height = INT ')'
+;
+
+Point:
+	'(' x = INT ',' y = INT ')'
+;
+
+Initialization:
+	'Points:' points += Point+
+;
+
+enum RULE:
+	LIVE = 		'Live:' 	|
+	DIE = 		'Die:'		|
+	AWAKEN = 	'Awaken:'
+;
+Evolution:
+	rule=RULE exprs += Expr+  
+;
+
+Operator:
+	'>='	|
+	'>'		|
+	'<'		|
+	'<='	|
+	'=='	|
+	'!='
+;
+
+Expr:
+	op=Operator number=INT
+;
+

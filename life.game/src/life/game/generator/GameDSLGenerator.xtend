@@ -3,6 +3,7 @@
  */
 package life.game.generator
 
+import life.game.gameDSL.GoL
 import org.eclipse.emf.ecore.resource.Resource
 import org.eclipse.xtext.generator.AbstractGenerator
 import org.eclipse.xtext.generator.IFileSystemAccess2
@@ -16,10 +17,12 @@ import org.eclipse.xtext.generator.IGeneratorContext
 class GameDSLGenerator extends AbstractGenerator {
 
 	override void doGenerate(Resource resource, IFileSystemAccess2 fsa, IGeneratorContext context) {
-//		fsa.generateFile('greetings.txt', 'People to greet: ' + 
-//			resource.allContents
-//				.filter(Greeting)
-//				.map[name]
-//				.join(', '))
+		val root = resource.allContents.head as GoL;
+		
+		if (root !== null) {
+			var path = '../src/GameOfLife/'
+			
+			fsa.generateFile(path+'RulesOfLife.java', RuleGenerator.toCode(root))
+		}
 	}
 }
