@@ -3,7 +3,9 @@
  */
 package life.game.validation
 
-import life.game.gameDSL.GameDSLPackage.Literals
+import java.util.Arrays
+import life.game.gameDSL.Evolution
+import life.game.gameDSL.Expr
 import life.game.gameDSL.GoL
 import life.game.gameDSL.Grid
 import life.game.gameDSL.Initialization
@@ -30,10 +32,10 @@ class GameDSLValidator extends AbstractGameDSLValidator {
 	@Check
 	def checkGridNotSmallerThanMin(Grid grid) {
 		if (grid.width < 40) {
-			error("Min width is 40!", null);
+			error("Min width is 40!", grid, null, -1);
 		}
 		if (grid.height < 40) {
-			error("Min height is 40!", null);
+			error("Min height is 40!", grid, null, -1);
 		}
 	}
 	
@@ -65,5 +67,56 @@ class GameDSLValidator extends AbstractGameDSLValidator {
 				}				
 			}
 		}
+	}
+	
+	@Check
+	def checkRulesDomainNonZero(Evolution evo) {	
+		// Set domain to all true
+		var boolean[] domain = #[true,true,true,true,true,true,true,true,true];
+		var boolean next;
+		var Expr cur;
+
+		for (Expr tmp : evo.exprs) {
+			domain = #[true,true,true,true,true,true,true,true,true];
+			cur = tmp;
+			next = false;
+
+			// Continue for all AND's
+			while (!next) {
+				// For every place in domain, check if its reachable
+				for (var i = 0 as int; i < 9; i++) {
+					switch(cur.op) {
+						case '>=': if (cur.number >= i) { domain.set(i, false); }
+						case '>':  if (cur.number > i) { domain.set(i, false); }
+						case '<':  if (cur.number < i) { domain.set(i, false); }
+						case '<=': if (cur.number <= i) { domain.set(i, false); }
+						case '!=': if (cur.number == i) { domain.set(i, false); }
+						case '==': if (cur.number == i) {
+							if (!domain.get(i)) { Arrays.fill(domain, false); }
+							else {Arrays.fill(domain, false); domain.set(i, true); }
+						}
+					}
+				}
+
+				// If there are no more AND's
+				if (cur.getOther === null) {
+					// If there are no more reachable places, raise error
+					if (!anyTrue(domain)) {
+						error("The given domain is equal to an empty domain", cur, null, -1);
+					}
+
+					// No more Expr to check in this line, go next
+					next = true;
+				}
+
+				// Check the next Expr after AND
+				cur = cur.getOther();
+			}
+		}
+	}
+
+	def boolean anyTrue(boolean[] array) {
+    	for(boolean b : array) if(b) return true;
+    	return false;
 	}
 }
