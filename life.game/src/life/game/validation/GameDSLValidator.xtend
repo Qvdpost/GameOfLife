@@ -3,6 +3,12 @@
  */
 package life.game.validation
 
+import life.game.gameDSL.GameDSLPackage.Literals
+import life.game.gameDSL.GoL
+import life.game.gameDSL.Grid
+import life.game.gameDSL.Initialization
+import life.game.gameDSL.Point
+import org.eclipse.xtext.validation.Check
 
 /**
  * This class contains custom validation rules. 
@@ -21,5 +27,43 @@ class GameDSLValidator extends AbstractGameDSLValidator {
 //					INVALID_NAME)
 //		}
 //	}
+	@Check
+	def checkGridNotSmallerThanMin(Grid grid) {
+		if (grid.width < 40) {
+			error("Min width is 40!", null);
+		}
+		if (grid.height < 40) {
+			error("Min height is 40!", null);
+		}
+	}
 	
+//	@Check
+//	def checkGridNotTooBig(Grid grid) {
+//		if ()
+//	}
+
+	@Check
+	def checkPointsNotOutsideGrid(GoL gol) {
+		// Default grid size		
+		var xSize = 80 as int
+		var ySize = 60 as int;
+		if (gol.grid !== null) {
+			xSize = gol.grid.width;
+			ySize = gol.grid.height;
+		}
+
+		// For each initialization, go check if it contains points that we can check		
+		for (Initialization init : gol.init) {
+			if (init.getPoints !== null) {
+				for (Point p: init.getPoints) {
+					if (p.x < 0 || p.x > xSize) {
+						error("Point falls outside of width!", p, null, -1);
+					}
+					if (p.y < 0 || p.y > ySize) {
+						error("Point falls outside of height!", p, null, -1);
+					}					
+				}				
+			}
+		}
+	}
 }
