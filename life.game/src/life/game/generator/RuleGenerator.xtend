@@ -4,9 +4,10 @@ import life.game.gameDSL.Evolution
 import life.game.gameDSL.Expr
 import life.game.gameDSL.GoL
 import life.game.gameDSL.Grid
-import life.game.gameDSL.Initialization
+import life.game.gameDSL.Percentage
 import life.game.gameDSL.Point
 import life.game.gameDSL.RULE
+import life.game.gameDSL.Range
 import org.eclipse.emf.common.util.EList
 
 class RuleGenerator {
@@ -48,7 +49,12 @@ class RuleGenerator {
 	    }
 	    
 	    public static void initializePoints(ArrayList<Point> points) {
-	    	«FOR init : root.init»«toCode(init)»«"\n"»«ENDFOR»
+	    	«FOR init : root.init SEPARATOR "\n"»«IF init.getPoints().size() != 0»«FOR point : init.getPoints() SEPARATOR "\n"»«toCode(point)»«ENDFOR»«ENDIF»«ENDFOR»
+	    	«FOR init : root.init SEPARATOR "\n"»«IF init.getRanges().size() != 0»«FOR point : init.getRanges() SEPARATOR "\n"»«toCode(point)»«ENDFOR»«ENDIF»«ENDFOR»
+	    }
+	    
+	    public static int initializePercentage() {
+	    	return «FOR init : root.init»«IF init.getPercentage() !== null»«toCode(init.getPercentage())»«ENDIF»«ENDFOR»
 	    }
 	    
 	    public static Dimension setGrid() {
@@ -57,20 +63,16 @@ class RuleGenerator {
 	}
 	'''
 	
-	def static CharSequence toCode(Initialization u) {
-		if (u.getPoints().size() != 0) {
-			return '''«FOR arg : u.getPoints()»«toCode(arg)»«ENDFOR»'''
-		}
-		else if (u.getPercentage() !== null) {
-			return ""
-		}
-		else if (u.getRanges().size() != 0) {
-			return ""
-		}
-	}
-	
 	def static CharSequence toCode(Point u) {
 		return '''points.add(new Point(«u.x», «u.y»));'''
+	}
+	
+	def static CharSequence toCode(Percentage u) {
+		return '''«u.number»;'''
+	}
+	
+	def static CharSequence toCode(Range u) {
+		return '''«FOR x : u.p1.x ..< u.p2.x SEPARATOR "\n"»«FOR y: u.p1.y ..< u.p2.y SEPARATOR "\n"»points.add(new Point(«x», «y»));«ENDFOR»«ENDFOR»'''
 	}
 	
 	def static CharSequence toCode(Grid u) {
@@ -95,6 +97,10 @@ class RuleGenerator {
 	}
 	
 	def static CharSequence toCode(EList<Expr> exprs) {
-		return '''«FOR expr : exprs SEPARATOR " && "»surrounding «expr.op» «expr.number»«ENDFOR»'''
+		return '''«FOR expr : exprs SEPARATOR " || "»(«toCode(expr)»)«ENDFOR»'''
+	}
+	
+	def static CharSequence toCode(Expr expr) {
+		return '''surrounding «expr.op» «expr.number»«IF expr.other !== null» && «toCode(expr.other)»«ENDIF»'''
 	}
 }

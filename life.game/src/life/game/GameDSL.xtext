@@ -35,7 +35,7 @@ enum RULE:
 	AWAKEN = 	'Awaken:'
 ;
 Evolution:
-	rule=RULE exprs += Expr+  
+	rule=RULE exprs += Expr+
 ;
 
 Operator:
@@ -48,6 +48,7 @@ Operator:
 ;
 
 Expr:
-	op=Operator number=INT
+	op=Operator number=INT |
+	op=Operator number=INT 'AND' other=Expr
 ;
 
