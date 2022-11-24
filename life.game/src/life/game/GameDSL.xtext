@@ -4,11 +4,19 @@ generate gameDSL "http://www.game.life/GameDSL"
 
 GoL:
 	'Game' 'of' 'life:' grid=Grid? 
-	('Initialize:' init = Initialization)?
+	('Initialize:' init += Initialization+)?
 	('Rules:' rules += Evolution+)?;
 	
 Grid:
 	'Grid' '(' width = INT ',' height = INT ')'
+;
+
+Percentage:
+	number=INT '%'
+;
+
+Range:
+	'(' p1=Point ',' p2=Point ')'
 ;
 
 Point:
@@ -16,7 +24,9 @@ Point:
 ;
 
 Initialization:
-	'Points:' points += Point+
+	"Points:" points += Point+ |
+	"Percentage:" percentage=Percentage |
+	"Range:" ranges += Range+
 ;
 
 enum RULE:

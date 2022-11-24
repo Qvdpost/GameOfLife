@@ -4,6 +4,7 @@ import life.game.gameDSL.Evolution
 import life.game.gameDSL.Expr
 import life.game.gameDSL.GoL
 import life.game.gameDSL.Grid
+import life.game.gameDSL.Initialization
 import life.game.gameDSL.Point
 import life.game.gameDSL.RULE
 import org.eclipse.emf.common.util.EList
@@ -36,19 +37,18 @@ class RuleGenerator {
 
 	                if ((gameBoard[i][j])){
 	               		«FOR evo : root.rules»«toCode(evo, RULE.LIVE)»«ENDFOR»
-	            	} 
-	                if ((!gameBoard[i][j])){
-	                	«FOR evo : root.rules»«toCode(evo, RULE.AWAKEN)»«ENDFOR»
-	                } 
-	                if ((gameBoard[i][j])){
+
 	                	«FOR evo : root.rules»«toCode(evo, RULE.DIE)»«ENDFOR»
+	                }
+	                else {
+	                	«FOR evo : root.rules»«toCode(evo, RULE.AWAKEN)»«ENDFOR»
 	                } 
 	            }
 	        }
 	    }
 	    
 	    public static void initializePoints(ArrayList<Point> points) {
-	    	«FOR point : root.init.points»«toCode(point)»«"\n"»«ENDFOR»
+	    	«FOR init : root.init»«toCode(init)»«"\n"»«ENDFOR»
 	    }
 	    
 	    public static Dimension setGrid() {
@@ -56,6 +56,18 @@ class RuleGenerator {
 	    }
 	}
 	'''
+	
+	def static CharSequence toCode(Initialization u) {
+		if (u.getPoints().size() != 0) {
+			return '''«FOR arg : u.getPoints()»«toCode(arg)»«ENDFOR»'''
+		}
+		else if (u.getPercentage() !== null) {
+			return ""
+		}
+		else if (u.getRanges().size() != 0) {
+			return ""
+		}
+	}
 	
 	def static CharSequence toCode(Point u) {
 		return '''points.add(new Point(«u.x», «u.y»));'''
@@ -83,6 +95,6 @@ class RuleGenerator {
 	}
 	
 	def static CharSequence toCode(EList<Expr> exprs) {
-		return '''«FOR expr : exprs»surrounding «expr.op» «expr.number»«ENDFOR»'''
+		return '''«FOR expr : exprs SEPARATOR " && "»surrounding «expr.op» «expr.number»«ENDFOR»'''
 	}
 }
