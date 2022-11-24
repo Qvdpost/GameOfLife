@@ -6,6 +6,7 @@ package life.game.validation
 import java.util.Arrays
 import life.game.gameDSL.Evolution
 import life.game.gameDSL.Expr
+import life.game.gameDSL.GameDSLPackage.Literals
 import life.game.gameDSL.GoL
 import life.game.gameDSL.Grid
 import life.game.gameDSL.Initialization
@@ -32,10 +33,10 @@ class GameDSLValidator extends AbstractGameDSLValidator {
 	@Check
 	def checkGridNotSmallerThanMin(Grid grid) {
 		if (grid.width < 40) {
-			error("Min width is 40!", grid, null, -1);
+			error("Min width is 40!", grid, Literals.GRID__WIDTH, -1);
 		}
 		if (grid.height < 40) {
-			error("Min height is 40!", grid, null, -1);
+			error("Min height is 40!", grid, Literals.GRID__HEIGHT, -1);
 		}
 	}
 	
@@ -59,10 +60,10 @@ class GameDSLValidator extends AbstractGameDSLValidator {
 			if (init.getPoints !== null) {
 				for (Point p: init.getPoints) {
 					if (p.x < 0 || p.x > xSize) {
-						error("Point falls outside of width!", p, null, -1);
+						error("Point falls outside of width!", p, Literals.POINT__X, -1);
 					}
 					if (p.y < 0 || p.y > ySize) {
-						error("Point falls outside of height!", p, null, -1);
+						error("Point falls outside of height!", p, Literals.POINT__Y, -1);
 					}					
 				}				
 			}
@@ -102,7 +103,7 @@ class GameDSLValidator extends AbstractGameDSLValidator {
 				if (cur.getOther === null) {
 					// If there are no more reachable places, raise error
 					if (!anyTrue(domain)) {
-						error("The given domain is equal to an empty domain", cur, null, -1);
+						error("The given domain is equal to an empty domain", tmp, null, -1);
 					}
 
 					// No more Expr to check in this line, go next
