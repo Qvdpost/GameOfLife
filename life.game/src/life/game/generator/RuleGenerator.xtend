@@ -41,25 +41,34 @@ class RuleGenerator {
 	                Point point = new Point(i-1,j-1);
 
 	                if ((gameBoard[i][j])){
-	               		«FOR evo : root.rules.list»«toCode(evo, RULE.LIVE)»«ENDFOR»
-
-	                	«FOR evo : root.rules.list»«toCode(evo, RULE.DIE)»«ENDFOR»
+	                	«IF root.rules !== null»
+		               		«FOR evo : root.rules.list»«toCode(evo, RULE.LIVE)»«ENDFOR»
+	
+		                	«FOR evo : root.rules.list»«toCode(evo, RULE.DIE)»«ENDFOR»
+	                	«ENDIF»
 	                }
 	                else {
-	                	«FOR evo : root.rules.list»«toCode(evo, RULE.AWAKEN)»«ENDFOR»
+	                	«IF root.rules !== null»
+	                		«FOR evo : root.rules.list»«toCode(evo, RULE.AWAKEN)»«ENDFOR»
+	                	«ENDIF»
 	                } 
 	            }
 	        }
 	    }
 	    
 	    public static void initializePoints(ArrayList<Point> points) {
-	    	«FOR init : root.init.list SEPARATOR "\n"»«IF init.getPoints().size() != 0»«FOR point : init.getPoints() SEPARATOR "\n"»«toCode(point)»«ENDFOR»«ENDIF»«ENDFOR»
-	    	«FOR init : root.init.list SEPARATOR "\n"»«IF init.getRanges().size() != 0»«FOR point : init.getRanges() SEPARATOR "\n"»«toCode(point)»«ENDFOR»«ENDIF»«ENDFOR»
-	    	«FOR init : root.init.list SEPARATOR "\n"»«IF init.getPatterns().size() != 0»«FOR pattern : init.getPatterns() SEPARATOR "\n"»«toCode(pattern)»«ENDFOR»«ENDIF»«ENDFOR»
+	    	«IF root.init !== null»
+		    	«FOR init : root.init.list SEPARATOR "\n"»«IF init.getPoints().size() != 0»«FOR point : init.getPoints() SEPARATOR "\n"»«toCode(point)»«ENDFOR»«ENDIF»«ENDFOR»
+		    	«FOR init : root.init.list SEPARATOR "\n"»«IF init.getRanges().size() != 0»«FOR point : init.getRanges() SEPARATOR "\n"»«toCode(point)»«ENDFOR»«ENDIF»«ENDFOR»
+		    	«FOR init : root.init.list SEPARATOR "\n"»«IF init.getPatterns().size() != 0»«FOR pattern : init.getPatterns() SEPARATOR "\n"»«toCode(pattern)»«ENDFOR»«ENDIF»«ENDFOR»
+	    	«ENDIF»
 	    }
 	    
 	    public static int initializePercentage() {
-	    	«IF initPercent(root.init.list).length() != 0»«initPercent(root.init.list)»«ELSE»return 0;«ENDIF»
+	    	«IF root.init !== null»
+		    	«IF initPercent(root.init.list).length() != 0»«initPercent(root.init.list)»«ELSE»return 0;«ENDIF»
+		    «ELSE»return 0;
+	    	«ENDIF»
 	    }
 	    
 	    public static Dimension setGrid() {
