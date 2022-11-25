@@ -57,9 +57,11 @@ class RuleGenerator {
 	    }
 	    
 	    public static void initializePoints(ArrayList<Point> points) {
-	    	«FOR init : root.init.list SEPARATOR "\n"»«IF init.getPoints().size() != 0»«FOR point : init.getPoints() SEPARATOR "\n"»«toCode(point)»«ENDFOR»«ENDIF»«ENDFOR»
-	    	«FOR init : root.init.list SEPARATOR "\n"»«IF init.getRanges().size() != 0»«FOR range : init.getRanges() SEPARATOR "\n"»«toCode(range)»«ENDFOR»«ENDIF»«ENDFOR»
-	    	«FOR init : root.init.list SEPARATOR "\n"»«IF init.getPatterns().size() != 0»«FOR pattern : init.getPatterns() SEPARATOR "\n"»«toCode(pattern)»«ENDFOR»«ENDIF»«ENDFOR»
+	    	«IF root.init !== null»
+		    	«FOR init : root.init.list SEPARATOR "\n"»«IF init.getPoints().size() != 0»«FOR point : init.getPoints() SEPARATOR "\n"»«toCode(point)»«ENDFOR»«ENDIF»«ENDFOR»
+		    	«FOR init : root.init.list SEPARATOR "\n"»«IF init.getRanges().size() != 0»«FOR range : init.getRanges() SEPARATOR "\n"»«toCode(range)»«ENDFOR»«ENDIF»«ENDFOR»
+		    	«FOR init : root.init.list SEPARATOR "\n"»«IF init.getPatterns().size() != 0»«FOR pattern : init.getPatterns() SEPARATOR "\n"»«toCode(pattern)»«ENDFOR»«ENDIF»«ENDFOR»
+	    	«ENDIF»
 	    }
 	    
 	    public static int initializePercentage() {
