@@ -10,9 +10,12 @@ import life.game.gameDSL.GameDSLPackage.Literals
 import life.game.gameDSL.GoL
 import life.game.gameDSL.Grid
 import life.game.gameDSL.Initialization
+import life.game.gameDSL.LOGICALOPERATOR
+import life.game.gameDSL.Pattern
 import life.game.gameDSL.Percentage
 import life.game.gameDSL.Point
 import life.game.gameDSL.Range
+import life.game.gameDSL.impl.GameDSLFactoryImpl
 import org.eclipse.xtext.validation.Check
 
 /**
@@ -21,17 +24,8 @@ import org.eclipse.xtext.validation.Check
  * See https://www.eclipse.org/Xtext/documentation/303_runtime_concepts.html#validation
  */
 class GameDSLValidator extends AbstractGameDSLValidator {
+	static var fact = GameDSLFactoryImpl.init;
 	
-//	public static val INVALID_NAME = 'invalidName'
-//
-//	@Check
-//	def checkGreetingStartsWithCapital(Greeting greeting) {
-//		if (!Character.isUpperCase(greeting.name.charAt(0))) {
-//			warning('Name should start with a capital', 
-//					GameDSLPackage.Literals.GREETING__NAME,
-//					INVALID_NAME)
-//		}
-//	}
 	@Check
 	def checkGridNotSmallerThanMin(Grid grid) {
 		if (grid.width < 40) {
@@ -41,18 +35,13 @@ class GameDSLValidator extends AbstractGameDSLValidator {
 			error("Min height is 40!", grid, Literals.GRID__HEIGHT, -1);
 		}
 	}
-	
-//	@Check
-//	def checkGridNotTooBig(Grid grid) {
-//		if ()
-//	}
 
-	def goCheckPoint(Point p, int xMax, int yMax) {
-		if (p.x < 0 || p.x > xMax) {
-			error("Point falls outside of width!", p, Literals.POINT__X, -1);
+	def goCheckPoint(Point p, int xMax, int yMax, Point msgPos) {
+		if (p.x < 0 || p.x >= xMax) {
+			error("Point falls outside of width!", msgPos, Literals.POINT__X, -1);
 		}
-		if (p.y < 0 || p.y > yMax) {
-			error("Point falls outside of height!", p, Literals.POINT__Y, -1);
+		if (p.y < 0 || p.y >= yMax) {
+			error("Point falls outside of height!", msgPos, Literals.POINT__Y, -1);
 		}
 	}
 
@@ -67,10 +56,10 @@ class GameDSLValidator extends AbstractGameDSLValidator {
 		}
 
 		// For each initialization, go check if it contains points that we can check		
-		for (Initialization init : gol.init) {
+		for (Initialization init : gol.init.list) {
 			if (init.getPoints !== null) {
 				for (Point p : init.getPoints) {
-					goCheckPoint(p, xSize, ySize);				
+					goCheckPoint(p, xSize, ySize, p);				
 				}	
 			}
 		}
@@ -87,24 +76,68 @@ class GameDSLValidator extends AbstractGameDSLValidator {
 		}
 		
 		// For each initialization, go check if it contains a range that we can check		
-		for (Initialization init : gol.init) {
+		for (Initialization init : gol.init.list) {
 			if (init.getRanges !== null) {
 				for (Range r : init.getRanges) {
-					goCheckPoint(r.p1, xSize, ySize);
-					goCheckPoint(r.p2, xSize, ySize);
+					goCheckPoint(r.p1, xSize, ySize, r.p1);
+					goCheckPoint(r.p2, xSize, ySize, r.p2);
 				}
 			}
 		}
 	}
 	
 	@Check
+	def checkPatternsInGrid(GoL gol) {
+		// Default grid size		
+		var xSize = 80 as int
+		var ySize = 60 as int;
+		if (gol.grid !== null) {
+			xSize = gol.grid.width;
+			ySize = gol.grid.height;
+		}
+
+		// For each initialization, go check if it contains points that we can check		
+		for (Initialization init : gol.init.list) {
+			if (init.getPatterns !== null) {
+				for (Pattern p : init.getPatterns) {
+					// Check starting point
+					goCheckPoint(p.start, xSize, ySize, p.start);
+
+					//Check ending point
+					var Point far = fact.createPoint();
+					switch (p.pattern) {
+						case GLIDER: {
+							far.setX(p.start.x+2);
+							far.setY(p.start.y+2);
+						}
+						case BLINKER: {
+							far.setX(p.start.x);
+							far.setY(p.start.y+2);
+						}
+						case BLOCK: {
+							far.setX(p.start.x+1);
+							far.setY(p.start.y+1);
+						}
+						
+					}
+					goCheckPoint(far, xSize, ySize, p.start);
+				}	
+			}
+		}
+	}
+	
+	@Check
 	def checkRulesDomainNonZero(Evolution evo) {	
+		if (evo.name != "Neighbors:") { return; }
+
 		// Set domain to all true
 		var boolean[] domain = #[true,true,true,true,true,true,true,true,true];
 		var boolean next;
+		var boolean break = false;
+		var Expr tmp = evo.expr;
 		var Expr cur;
-
-		for (Expr tmp : evo.exprs) {
+		
+		while (!break) {
 			domain = #[true,true,true,true,true,true,true,true,true];
 			cur = tmp;
 			next = false;
@@ -127,14 +160,20 @@ class GameDSLValidator extends AbstractGameDSLValidator {
 				}
 
 				// If there are no more AND's
-				if (cur.getOther === null) {
+				if (cur.getOther === null || cur.logOp === LOGICALOPERATOR.OR) {
 					// If there are no more reachable places, raise error
 					if (!anyTrue(domain)) {
-						warning("The given domain is equal to an empty domain", tmp, null, -1);
+						warning("The given domain is equal to an empty domain", tmp, Literals.EXPR__LOG_OP, -1);
 					}
 
-					// No more Expr to check in this line, go next
-					next = true;
+					if (cur.logOp !== LOGICALOPERATOR.OR) {						
+						// No more Expr to check in this line, go next
+						next = true;
+						break = true;
+					}
+
+					tmp = cur.getOther();
+					domain = #[true,true,true,true,true,true,true,true,true];
 				}
 
 				// Check the next Expr after AND

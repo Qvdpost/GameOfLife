@@ -41,7 +41,18 @@ Initializations:
 Initialization:
 	"Points:" BEGIN points += Point+ END			|
 	"Percentage:" BEGIN percentage=Percentage  END	|
-	"Range:" BEGIN ranges += Range+ END
+	"Range:" BEGIN ranges += Range+ END				|
+	"Patterns:" BEGIN patterns += Pattern+ END
+;
+
+enum COMPLEX:
+	BLINKER = "blinker" |
+	BLOCK = "block" |
+	GLIDER = "glider"
+;
+
+Pattern:
+	pattern = COMPLEX start=Point 
 ;
 
 enum RULE:
