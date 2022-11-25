@@ -1,11 +1,13 @@
 package life.game.generator
 
+import life.game.gameDSL.COMPLEX
 import life.game.gameDSL.Evolution
 import life.game.gameDSL.Expr
 import life.game.gameDSL.GoL
 import life.game.gameDSL.Grid
 import life.game.gameDSL.Initialization
 import life.game.gameDSL.LOGICALOPERATOR
+import life.game.gameDSL.Pattern
 import life.game.gameDSL.Percentage
 import life.game.gameDSL.Point
 import life.game.gameDSL.RULE
@@ -52,7 +54,8 @@ class RuleGenerator {
 	    
 	    public static void initializePoints(ArrayList<Point> points) {
 	    	«FOR init : root.init SEPARATOR "\n"»«IF init.getPoints().size() != 0»«FOR point : init.getPoints() SEPARATOR "\n"»«toCode(point)»«ENDFOR»«ENDIF»«ENDFOR»
-	    	«FOR init : root.init SEPARATOR "\n"»«IF init.getRanges().size() != 0»«FOR point : init.getRanges() SEPARATOR "\n"»«toCode(point)»«ENDFOR»«ENDIF»«ENDFOR»
+	    	«FOR init : root.init SEPARATOR "\n"»«IF init.getRanges().size() != 0»«FOR range : init.getRanges() SEPARATOR "\n"»«toCode(range)»«ENDFOR»«ENDIF»«ENDFOR»
+	    	«FOR init : root.init SEPARATOR "\n"»«IF init.getPatterns().size() != 0»«FOR pattern : init.getPatterns() SEPARATOR "\n"»«toCode(pattern)»«ENDFOR»«ENDIF»«ENDFOR»
 	    }
 	    
 	    public static int initializePercentage() {
@@ -79,6 +82,14 @@ class RuleGenerator {
 	
 	def static CharSequence toCode(Range u) {
 		return '''«FOR x : u.p1.x ..< u.p2.x SEPARATOR "\n"»«FOR y: u.p1.y ..< u.p2.y SEPARATOR "\n"»points.add(new Point(«x», «y»));«ENDFOR»«ENDFOR»'''
+	}
+	
+	def static CharSequence toCode(Pattern p) {
+		switch(p.pattern) {
+			case COMPLEX.BLINKER: return '''points.add(new Point(«p.start.x», «p.start.y»));«"\n"»points.add(new Point(«p.start.x», «p.start.y+1»));«"\n"»points.add(new Point(«p.start.x», «p.start.y+2»));«"\n"»'''
+			case COMPLEX.BLOCK: return '''points.add(new Point(«p.start.x», «p.start.y»));«"\n"»points.add(new Point(«p.start.x+1», «p.start.y»));«"\n"»points.add(new Point(«p.start.x», «p.start.y+1»));«"\n"»points.add(new Point(«p.start.x+1», «p.start.y+1»));«"\n"»'''
+			case COMPLEX.GLIDER: return '''points.add(new Point(«p.start.x», «p.start.y+1»));«"\n"»points.add(new Point(«p.start.x+1», «p.start.y+2»));«"\n"»points.add(new Point(«p.start.x+2», «p.start.y+2»));«"\n"»points.add(new Point(«p.start.x+2», «p.start.y+1»));«"\n"»points.add(new Point(«p.start.x+2», «p.start.y»));«"\n"»'''
+		}
 	}
 	
 	def static CharSequence toCode(Grid u) {
