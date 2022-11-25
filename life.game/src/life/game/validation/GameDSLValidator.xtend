@@ -10,7 +10,9 @@ import life.game.gameDSL.GameDSLPackage.Literals
 import life.game.gameDSL.GoL
 import life.game.gameDSL.Grid
 import life.game.gameDSL.Initialization
+import life.game.gameDSL.Percentage
 import life.game.gameDSL.Point
+import life.game.gameDSL.Range
 import org.eclipse.xtext.validation.Check
 
 /**
@@ -45,6 +47,15 @@ class GameDSLValidator extends AbstractGameDSLValidator {
 //		if ()
 //	}
 
+	def goCheckPoint(Point p, int xMax, int yMax) {
+		if (p.x < 0 || p.x > xMax) {
+			error("Point falls outside of width!", p, Literals.POINT__X, -1);
+		}
+		if (p.y < 0 || p.y > yMax) {
+			error("Point falls outside of height!", p, Literals.POINT__Y, -1);
+		}
+	}
+
 	@Check
 	def checkPointsNotOutsideGrid(GoL gol) {
 		// Default grid size		
@@ -58,14 +69,30 @@ class GameDSLValidator extends AbstractGameDSLValidator {
 		// For each initialization, go check if it contains points that we can check		
 		for (Initialization init : gol.init) {
 			if (init.getPoints !== null) {
-				for (Point p: init.getPoints) {
-					if (p.x < 0 || p.x > xSize) {
-						error("Point falls outside of width!", p, Literals.POINT__X, -1);
-					}
-					if (p.y < 0 || p.y > ySize) {
-						error("Point falls outside of height!", p, Literals.POINT__Y, -1);
-					}					
-				}				
+				for (Point p : init.getPoints) {
+					goCheckPoint(p, xSize, ySize);				
+				}	
+			}
+		}
+	}
+	
+	@Check
+	def rangeInsideGrid(GoL gol) {
+		// Default grid size		
+		var xSize = 80 as int
+		var ySize = 60 as int;
+		if (gol.grid !== null) {
+			xSize = gol.grid.width;
+			ySize = gol.grid.height;
+		}
+		
+		// For each initialization, go check if it contains a range that we can check		
+		for (Initialization init : gol.init) {
+			if (init.getRanges !== null) {
+				for (Range r : init.getRanges) {
+					goCheckPoint(r.p1, xSize, ySize);
+					goCheckPoint(r.p2, xSize, ySize);
+				}
 			}
 		}
 	}
@@ -103,7 +130,7 @@ class GameDSLValidator extends AbstractGameDSLValidator {
 				if (cur.getOther === null) {
 					// If there are no more reachable places, raise error
 					if (!anyTrue(domain)) {
-						error("The given domain is equal to an empty domain", tmp, null, -1);
+						warning("The given domain is equal to an empty domain", tmp, null, -1);
 					}
 
 					// No more Expr to check in this line, go next
@@ -119,5 +146,15 @@ class GameDSLValidator extends AbstractGameDSLValidator {
 	def boolean anyTrue(boolean[] array) {
     	for(boolean b : array) if(b) return true;
     	return false;
+	}
+
+	@Check
+	def checkPercentagesPossible(Percentage per) {
+		if (per.number < 0) {
+			warning("This percentages is negative (program will treat it as 0).", per, Literals.PERCENTAGE__NUMBER, -1);
+		}
+		else if (per.number > 100) {
+			warning("This percentages is over 100 (program will treat it as 100).", per, Literals.PERCENTAGE__NUMBER, -1);
+		}
 	}
 }
