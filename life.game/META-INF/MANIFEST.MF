@@ -26,5 +26,6 @@ Export-Package: life.game.validation,
  life.game.gameDSL,
  life.game.services,
  life.game.serializer,
- life.game.gameDSL.util
+ life.game.gameDSL.util,
+ life.game.parser.antlr.lexer
 Import-Package: org.apache.log4j

@@ -4,7 +4,7 @@
 package life.game.tests
 
 import com.google.inject.Inject
-import life.game.gameDSL.Model
+import life.game.gameDSL.GoL
 import org.eclipse.xtext.testing.InjectWith
 import org.eclipse.xtext.testing.extensions.InjectionExtension
 import org.eclipse.xtext.testing.util.ParseHelper
@@ -16,12 +16,12 @@ import org.junit.jupiter.api.^extension.ExtendWith
 @InjectWith(GameDSLInjectorProvider)
 class GameDSLParsingTest {
 	@Inject
-	ParseHelper<Model> parseHelper
+	ParseHelper<GoL> parseHelper
 	
 	@Test
 	def void loadModel() {
 		val result = parseHelper.parse('''
-			Hello Xtext!
+			Game of life:
 		''')
 		Assertions.assertNotNull(result)
 		val errors = result.eResource.errors

@@ -39,24 +39,24 @@ class RuleGenerator {
 	                Point point = new Point(i-1,j-1);
 
 	                if ((gameBoard[i][j])){
-	               		«FOR evo : root.rules»«toCode(evo, RULE.LIVE)»«ENDFOR»
+	               		«FOR evo : root.rules.list»«toCode(evo, RULE.LIVE)»«ENDFOR»
 
-	                	«FOR evo : root.rules»«toCode(evo, RULE.DIE)»«ENDFOR»
+	                	«FOR evo : root.rules.list»«toCode(evo, RULE.DIE)»«ENDFOR»
 	                }
 	                else {
-	                	«FOR evo : root.rules»«toCode(evo, RULE.AWAKEN)»«ENDFOR»
+	                	«FOR evo : root.rules.list»«toCode(evo, RULE.AWAKEN)»«ENDFOR»
 	                } 
 	            }
 	        }
 	    }
 	    
 	    public static void initializePoints(ArrayList<Point> points) {
-	    	«FOR init : root.init SEPARATOR "\n"»«IF init.getPoints().size() != 0»«FOR point : init.getPoints() SEPARATOR "\n"»«toCode(point)»«ENDFOR»«ENDIF»«ENDFOR»
-	    	«FOR init : root.init SEPARATOR "\n"»«IF init.getRanges().size() != 0»«FOR point : init.getRanges() SEPARATOR "\n"»«toCode(point)»«ENDFOR»«ENDIF»«ENDFOR»
+	    	«FOR init : root.init.list SEPARATOR "\n"»«IF init.getPoints().size() != 0»«FOR point : init.getPoints() SEPARATOR "\n"»«toCode(point)»«ENDFOR»«ENDIF»«ENDFOR»
+	    	«FOR init : root.init.list SEPARATOR "\n"»«IF init.getRanges().size() != 0»«FOR point : init.getRanges() SEPARATOR "\n"»«toCode(point)»«ENDFOR»«ENDIF»«ENDFOR»
 	    }
 	    
 	    public static int initializePercentage() {
-	    	«IF initPercent(root.init).length() != 0»«initPercent(root.init)»«ELSE»return 0;«ENDIF»
+	    	«IF initPercent(root.init.init).length() != 0»«initPercent(root.init.init)»«ELSE»return 0;«ENDIF»
 	    }
 	    
 	    public static Dimension setGrid() {

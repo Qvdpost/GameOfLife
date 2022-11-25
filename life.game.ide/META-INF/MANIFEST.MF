@@ -12,4 +12,5 @@ Require-Bundle: life.game,
  org.antlr.runtime;bundle-version="[3.2.0,3.2.1)"
 Bundle-RequiredExecutionEnvironment: JavaSE-11
 Export-Package: life.game.ide.contentassist.antlr,
- life.game.ide.contentassist.antlr.internal
+ life.game.ide.contentassist.antlr.internal,
+ life.game.ide.contentassist.antlr.lexer

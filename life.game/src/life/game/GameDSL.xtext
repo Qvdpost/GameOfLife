@@ -3,12 +3,20 @@ grammar life.game.GameDSL with org.eclipse.xtext.common.Terminals
 generate gameDSL "http://www.game.life/GameDSL"
 
 GoL:
-	'Game' 'of' 'life:' grid=Grid? 
-	('Initialize:' init += Initialization+)?
-	('Rules:' rules += Evolution+)?;
+	'Game' 'of' 'life:'
+	BEGIN
+		grid=Grid?
+		init=Initializations?
+		rules=Evolutions?
+	END
+;
+	
+terminal BEGIN: 'synthetic:BEGIN';
+terminal END: 'synthetic:END';
 	
 Grid:
-	'Grid' '(' width = INT ',' height = INT ')'
+	 
+	'Grid' '(' width = INT ',' height = INT ')' 
 ;
 
 Percentage:
@@ -23,10 +31,17 @@ Point:
 	'(' x = INT ',' y = INT ')'
 ;
 
+Initializations:
+	'Initialize:' 
+	BEGIN
+		list += Initialization+ 
+	END
+;
+
 Initialization:
-	"Points:" points += Point+ |
-	"Percentage:" percentage=Percentage |
-	"Range:" ranges += Range+
+	"Points:" BEGIN points += Point+ END			|
+	"Percentage:" BEGIN percentage=Percentage  END	|
+	"Range:" BEGIN ranges += Range+ END
 ;
 
 enum RULE:
@@ -35,9 +50,16 @@ enum RULE:
 	AWAKEN = 	'Awaken:'
 ;
 
+Evolutions:
+	'Rules:' 
+	BEGIN
+		list += Evolution+
+	END
+;
+
 Evolution:
-	rule=RULE name='Percentage:' number=Percentage |
-	rule=RULE name='Neighbors:' expr=Expr		  
+	rule=RULE BEGIN name='Percentage:' BEGIN number=Percentage END END |
+	rule=RULE BEGIN name='Neighbors:' BEGIN expr=Expr END END
 ;
 
 Operator:
@@ -57,5 +79,6 @@ enum LOGICALOPERATOR:
 Expr:
 	op=Operator number=INT  									|
 	op=Operator number=INT logOp=LOGICALOPERATOR other=Expr 	
+	
 ;
 
