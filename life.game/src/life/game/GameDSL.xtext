@@ -26,7 +26,18 @@ Point:
 Initialization:
 	"Points:" points += Point+ |
 	"Percentage:" percentage=Percentage |
-	"Range:" ranges += Range+
+	"Range:" ranges += Range+ |
+	"Patterns:" patterns += Pattern+
+;
+
+enum COMPLEX:
+	BLINKER = "blinker" |
+	BLOCK = "block" |
+	GLIDER = "glider"
+;
+
+Pattern:
+	pattern = COMPLEX start=Point 
 ;
 
 enum RULE:
