@@ -34,8 +34,10 @@ enum RULE:
 	DIE = 		'Die:'		|
 	AWAKEN = 	'Awaken:'
 ;
+
 Evolution:
-	rule=RULE exprs += Expr+
+	rule=RULE name='Percentage:' number=Percentage |
+	rule=RULE name='Neighbors:' expr=Expr		  
 ;
 
 Operator:
@@ -47,8 +49,13 @@ Operator:
 	'!='
 ;
 
+enum LOGICALOPERATOR:
+	AND = 	'AND' |
+	OR 	= 	'OR'
+;
+
 Expr:
-	op=Operator number=INT |
-	op=Operator number=INT 'AND' other=Expr
+	op=Operator number=INT  									|
+	op=Operator number=INT logOp=LOGICALOPERATOR other=Expr 	
 ;
 

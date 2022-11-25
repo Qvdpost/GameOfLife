@@ -4,6 +4,8 @@ import life.game.gameDSL.Evolution
 import life.game.gameDSL.Expr
 import life.game.gameDSL.GoL
 import life.game.gameDSL.Grid
+import life.game.gameDSL.Initialization
+import life.game.gameDSL.LOGICALOPERATOR
 import life.game.gameDSL.Percentage
 import life.game.gameDSL.Point
 import life.game.gameDSL.RULE
@@ -54,7 +56,7 @@ class RuleGenerator {
 	    }
 	    
 	    public static int initializePercentage() {
-	    	return «FOR init : root.init»«IF init.getPercentage() !== null»«toCode(init.getPercentage())»«ENDIF»«ENDFOR»
+	    	«IF initPercent(root.init).length() != 0»«initPercent(root.init)»«ELSE»return 0;«ENDIF»
 	    }
 	    
 	    public static Dimension setGrid() {
@@ -62,6 +64,10 @@ class RuleGenerator {
 	    }
 	}
 	'''
+	
+	def static CharSequence initPercent(EList<Initialization> init) {
+		return '''«FOR u : init»«IF u.getPercentage() !== null»return «toCode(u.getPercentage())»«ENDIF»«ENDFOR»'''
+	}
 	
 	def static CharSequence toCode(Point u) {
 		return '''points.add(new Point(«u.x», «u.y»));'''
@@ -84,8 +90,17 @@ class RuleGenerator {
 	
 	def static CharSequence toCode(Evolution u, RULE target) {
 		switch (u.rule) {
-			case target: return '''if («toCode(u.exprs)») {«liveOrDie(target)»}'''
+			case target: return '''if («toCode(u)») {«liveOrDie(target)»}'''
 			default: return ""
+		}
+	}
+	
+	def static CharSequence toCode(Evolution u) {
+		if (u.name == "Percentage:") {
+			return '''Math.random()*100 < «u.number.number»'''
+		}
+		if (u.name == "Neighbors:") {
+			return toCode(u.expr)
 		}
 	}
 	
@@ -101,6 +116,14 @@ class RuleGenerator {
 	}
 	
 	def static CharSequence toCode(Expr expr) {
-		return '''surrounding «expr.op» «expr.number»«IF expr.other !== null» && «toCode(expr.other)»«ENDIF»'''
+		return '''surrounding «expr.op» «expr.number»«IF expr.other !== null»«toCode(expr.getLogOp())»«toCode(expr.other)»«ENDIF»'''
+	}
+	
+	def static CharSequence toCode(LOGICALOPERATOR op) {
+		switch (op) {
+			case LOGICALOPERATOR.AND: return " && "
+			case LOGICALOPERATOR.OR: return " || "
+			default: return ""
+		}
 	}
 }
