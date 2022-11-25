@@ -71,6 +71,17 @@ class GameDSLValidator extends AbstractGameDSLValidator {
 	}
 	
 	@Check
+	def checkGridAndPercentageCompatible(GoL gol) {
+		if (gol.grid !== null) {return;}
+		
+		for (Initialization init : gol.init.list) {
+			if (init.getPercentage !== null) {
+				warning("This percentage doesn't work when you don't give a grid size!", init.getPercentage, null, -1);
+			}
+		}
+	}
+	
+	@Check
 	def rangeSmallFirst(Range r) {
 		if (r.p1.x > r.p2.x) {
 			error("First point x in range is bigger than second point x", r, null, -1);
