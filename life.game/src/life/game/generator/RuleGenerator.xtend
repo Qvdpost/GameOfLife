@@ -41,12 +41,16 @@ class RuleGenerator {
 	                Point point = new Point(i-1,j-1);
 
 	                if ((gameBoard[i][j])){
-	               		«FOR evo : root.rules.list»«toCode(evo, RULE.LIVE)»«ENDFOR»
-
-	                	«FOR evo : root.rules.list»«toCode(evo, RULE.DIE)»«ENDFOR»
+	                	«IF root.rules !== null»
+		               		«FOR evo : root.rules.list»«toCode(evo, RULE.LIVE)»«ENDFOR»
+	
+		                	«FOR evo : root.rules.list»«toCode(evo, RULE.DIE)»«ENDFOR»
+	                	«ENDIF»
 	                }
 	                else {
-	                	«FOR evo : root.rules.list»«toCode(evo, RULE.AWAKEN)»«ENDFOR»
+	                	«IF root.rules !== null»
+	                		«FOR evo : root.rules.list»«toCode(evo, RULE.AWAKEN)»«ENDFOR»
+	                	«ENDIF»
 	                } 
 	            }
 	        }
@@ -59,7 +63,10 @@ class RuleGenerator {
 	    }
 	    
 	    public static int initializePercentage() {
-	    	«IF initPercent(root.init.list).length() != 0»«initPercent(root.init.list)»«ELSE»return 0;«ENDIF»
+	    	«IF root.init !== null»
+		    	«IF initPercent(root.init.list).length() != 0»«initPercent(root.init.list)»«ELSE»return 0;«ENDIF»
+		    «ELSE»return 0;
+	    	«ENDIF»
 	    }
 	    
 	    public static Dimension setGrid() {
