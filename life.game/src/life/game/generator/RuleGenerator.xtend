@@ -54,7 +54,7 @@ class RuleGenerator {
 	    
 	    public static void initializePoints(ArrayList<Point> points) {
 	    	«FOR init : root.init.list SEPARATOR "\n"»«IF init.getPoints().size() != 0»«FOR point : init.getPoints() SEPARATOR "\n"»«toCode(point)»«ENDFOR»«ENDIF»«ENDFOR»
-	    	«FOR init : root.init.list SEPARATOR "\n"»«IF init.getRanges().size() != 0»«FOR point : init.getRanges() SEPARATOR "\n"»«toCode(point)»«ENDFOR»«ENDIF»«ENDFOR»
+	    	«FOR init : root.init.list SEPARATOR "\n"»«IF init.getRanges().size() != 0»«FOR range : init.getRanges() SEPARATOR "\n"»«toCode(range)»«ENDFOR»«ENDIF»«ENDFOR»
 	    	«FOR init : root.init.list SEPARATOR "\n"»«IF init.getPatterns().size() != 0»«FOR pattern : init.getPatterns() SEPARATOR "\n"»«toCode(pattern)»«ENDFOR»«ENDIF»«ENDFOR»
 	    }
 	    
@@ -81,7 +81,7 @@ class RuleGenerator {
 	}
 	
 	def static CharSequence toCode(Range u) {
-		return '''«FOR x : u.p1.x ..< u.p2.x SEPARATOR "\n"»«FOR y: u.p1.y ..< u.p2.y SEPARATOR "\n"»points.add(new Point(«x», «y»));«ENDFOR»«ENDFOR»'''
+		return '''«FOR x : u.p1.x ..< u.p2.x+1 SEPARATOR "\n"»«FOR y: u.p1.y ..< u.p2.y+1 SEPARATOR "\n"»points.add(new Point(«x», «y»));«ENDFOR»«ENDFOR»'''
 	}
 	
 	def static CharSequence toCode(Pattern p) {

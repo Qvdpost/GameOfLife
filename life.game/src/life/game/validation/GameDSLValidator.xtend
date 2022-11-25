@@ -36,6 +36,11 @@ class GameDSLValidator extends AbstractGameDSLValidator {
 		}
 	}
 
+	@Check
+	def addInfoToGrid(Grid grid) {
+		info("Farthest coordinate is at x: " + (grid.width-1) + " y: " + (grid.height-1), grid, null, -1);
+	}
+
 	def goCheckPoint(Point p, int xMax, int yMax, Point msgPos) {
 		if (p.x < 0 || p.x >= xMax) {
 			error("Point falls outside of width!", msgPos, Literals.POINT__X, -1);
@@ -62,6 +67,16 @@ class GameDSLValidator extends AbstractGameDSLValidator {
 					goCheckPoint(p, xSize, ySize, p);				
 				}	
 			}
+		}
+	}
+	
+	@Check
+	def rangeSmallFirst(Range r) {
+		if (r.p1.x > r.p2.x) {
+			error("First point x in range is bigger than second point x", r, null, -1);
+		}
+		if (r.p1.y > r.p2.y) {
+			error("First point y in range is bigger than second point y", r, null, -1);
 		}
 	}
 	
@@ -121,6 +136,7 @@ class GameDSLValidator extends AbstractGameDSLValidator {
 						
 					}
 					goCheckPoint(far, xSize, ySize, p.start);
+					info("End of pattern is at x: " + far.x + " y: " + far.y, p.start, null, -1);
 				}	
 			}
 		}
